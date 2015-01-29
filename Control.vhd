@@ -18,9 +18,94 @@ end Control;
 
 architecture Behavioral of Control is
 
+	type fsm_states is (STORE_0, STORE_1, LOAD_R1, LOAD_R2, STORE_N, WAIT_S);
+	signal state: fsm_states;
+	signal next_state: fsm_states;
+	signal done : STD_LOGIC;
+	signal cnt_en : STD_LOGIC;
+	signal count : UNSIGNED(3 downto 0);
+
 begin
 
-	--put magic here!
+	counter: process (clk) is
+	begin
+		if rising_edge(clk) then
+			if rst = '1' then
+				count <= "0000";
+			else
+				if cnt_en = '1' then
+					count <= count +1;
+				end if;
+			end if;
+		end if;
+	end process counter;
+
+	state_reg : process (clk) is
+	begin
+		if rising_edge(clk) then
+			if (rst = '1') then
+				state <= STORE_0;
+			else
+				state <= next_state;
+			end if;
+		end if;
+	end process state_reg;
+	
+	next_states: process(state,rst,nxt) is
+	begin
+		case state is
+			when STORE_0 =>
+				if nxt = '1' then
+					next_state <= STORE_1;
+				end if;
+			when STORE_1 =>
+				if nxt = '1' then
+					next_state <= LOAD_R1;
+				end if;
+			when LOAD_R1 =>
+				next_state <= LOAD_R2;
+			when LOAD_R2 =>
+				next_state <= STORE_N;
+			when STORE_N =>
+				next_state <= WAIT_S;
+			when WAIT_S =>
+				if nxt ='1' and done = '0' then
+					next_state <= LOAD_R1;
+				end if;
+		end case;
+	end process next_states;
+		
+	done <= '1' when (count = to_unsigned(13, 4)) else '0';
+	
+	cnt_en <= nxt when (state = STORE_0) or (state = STORE_1)
+				else (nxt and (not done)) when state = WAIT_S
+				else '0';
+				
+	mem_wr <= '1' when (state = STORE_0) 
+						 or (state = STORE_1)
+						 or (state = STORE_N) 
+						 else '0';
+	
+	Mem_Addr <= count when (state = STORE_0) 
+						     or (state = STORE_1)
+						     or (state = STORE_N)
+			else count - 1 when (state = LOAD_R2)
+			else count - 2 when (state = LOAD_R1);
+			
+	r1_en <= '1' when (state = LOAD_R1)
+				else '0';
+				
+	r2_en <= '1' when (state = LOAD_R2)
+				else '0';
+				
+	out_en <= '1' when (state = STORE_0) 
+						     or (state = STORE_1)
+						     or (state = STORE_N)
+						else '0';
+						
+	Mux_Sel <= "10" when (state = STORE_0)
+			else "11" when (state = STORE_1)
+			else "00" when (state = STORE_N);
 
 end Behavioral;
 
