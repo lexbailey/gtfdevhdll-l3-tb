@@ -51,16 +51,20 @@ begin
 		end if;
 	end process state_reg;
 	
-	next_states: process(state,rst,nxt) is
+	next_states: process(state,rst,nxt,done) is
 	begin
 		case state is
 			when STORE_0 =>
 				if nxt = '1' then
 					next_state <= STORE_1;
+				else
+					next_state <= state;
 				end if;
 			when STORE_1 =>
 				if nxt = '1' then
 					next_state <= LOAD_R1;
+				else
+					next_state <= state;
 				end if;
 			when LOAD_R1 =>
 				next_state <= LOAD_R2;
@@ -71,7 +75,11 @@ begin
 			when WAIT_S =>
 				if nxt ='1' and done = '0' then
 					next_state <= LOAD_R1;
+				else
+					next_state <= state;
 				end if;
+			when others =>
+				next_state <= state;
 		end case;
 	end process next_states;
 		
@@ -86,11 +94,12 @@ begin
 						 or (state = STORE_N) 
 						 else '0';
 	
-	Mem_Addr <= count when (state = STORE_0) 
+	Mem_Addr <= "0" & count when (state = STORE_0) 
 						     or (state = STORE_1)
 						     or (state = STORE_N)
-			else count - 1 when (state = LOAD_R2)
-			else count - 2 when (state = LOAD_R1);
+			else "0" & (count - 1) when (state = LOAD_R2)
+			else "0" & (count - 2) when (state = LOAD_R1)
+			else "00000";
 			
 	r1_en <= '1' when (state = LOAD_R1)
 				else '0';
@@ -105,7 +114,8 @@ begin
 						
 	Mux_Sel <= "10" when (state = STORE_0)
 			else "11" when (state = STORE_1)
-			else "00" when (state = STORE_N);
+			else "00" when (state = STORE_N)
+			else "00";
 
 end Behavioral;
 
