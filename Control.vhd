@@ -23,7 +23,7 @@ architecture Behavioral of Control is
 	signal next_state: fsm_states;
 	signal done : STD_LOGIC;
 	signal cnt_en : STD_LOGIC;
-	signal count : UNSIGNED(3 downto 0);
+	signal count : UNSIGNED(4 downto 0);
 
 begin
 
@@ -31,7 +31,7 @@ begin
 	begin
 		if rising_edge(clk) then
 			if rst = '1' then
-				count <= "0000";
+				count <= "00000";
 			else
 				if cnt_en = '1' then
 					count <= count +1;
@@ -83,7 +83,7 @@ begin
 		end case;
 	end process next_states;
 		
-	done <= '1' when (count = to_unsigned(13, 4)) else '0';
+	done <= '1' when (count = "11000") else '0';
 	
 	cnt_en <= nxt when (state = STORE_0) or (state = STORE_1)
 				else (nxt and (not done)) when state = WAIT_S
@@ -94,11 +94,11 @@ begin
 						 or (state = STORE_N) 
 						 else '0';
 	
-	Mem_Addr <= "0" & count when (state = STORE_0) 
+	Mem_Addr <= count when (state = STORE_0) 
 						     or (state = STORE_1)
 						     or (state = STORE_N)
-			else "0" & (count - 1) when (state = LOAD_R2)
-			else "0" & (count - 2) when (state = LOAD_R1)
+			else (count - 1) when (state = LOAD_R2)
+			else (count - 2) when (state = LOAD_R1)
 			else "00000";
 			
 	r1_en <= '1' when (state = LOAD_R1)

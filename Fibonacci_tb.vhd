@@ -1,46 +1,75 @@
--- TestBench Template 
+LIBRARY ieee;
+USE ieee.std_logic_1164.ALL;
+USE ieee.numeric_std.ALL;
+ 
+ENTITY Fibonacci_tb IS
+END Fibonacci_tb;
+ 
+ARCHITECTURE behavior OF Fibonacci_tb IS 
+ 
+    -- Component Declaration for the Unit Under Test (UUT)
+ 
+    COMPONENT Fibonacci
+    PORT(
+         clk : IN  std_logic;
+         rst : IN  std_logic;
+         nxt : IN  std_logic;
+         Fib_Out : OUT  std_logic_vector(15 downto 0)
+        );
+    END COMPONENT;
+    
 
-  LIBRARY ieee;
-  USE ieee.std_logic_1164.ALL;
-  USE ieee.numeric_std.ALL;
+   --Inputs
+   signal clk : std_logic := '0';
+   signal rst : std_logic := '0';
+   signal nxt : std_logic := '0';
 
-  ENTITY testbench IS
-  END testbench;
+ 	--Outputs
+   signal Fib_Out : std_logic_vector(15 downto 0);
 
-  ARCHITECTURE behavior OF testbench IS 
+   -- Clock period definitions
+   constant clk_period : time := 10 ns;
+ 
+BEGIN
+ 
+	-- Instantiate the Unit Under Test (UUT)
+   uut: Fibonacci PORT MAP (
+          clk => clk,
+          rst => rst,
+          nxt => nxt,
+          Fib_Out => Fib_Out
+        );
 
-  -- Component Declaration
-          COMPONENT <component name>
-          PORT(
-                  <port1> : IN std_logic;
-                  <port2> : IN std_logic_vector(3 downto 0);       
-                  <port3> : OUT std_logic_vector(3 downto 0)
-                  );
-          END COMPONENT;
+   -- Clock process definitions
+   clk_process :process
+   begin
+		clk <= '0';
+		wait for clk_period/2;
+		clk <= '1';
+		wait for clk_period/2;
+   end process;
+ 
 
-          SIGNAL <signal1> :  std_logic;
-          SIGNAL <signal2> :  std_logic_vector(3 downto 0);
-          
+   -- Stimulus process
+   stim_proc: process
+   begin		
+      -- hold reset state for 100 ns.
+      wait for 100 ns;	
 
-  BEGIN
+		nxt <= '0';
+		rst <= '1';
+      wait for clk_period*2;
+		
+		next_loop: LOOP
+			nxt <= '1';
+			wait for clk_period*3;
+			nxt <= '0';
+			wait for clk_period*3;
+		END LOOP next_loop;
 
-  -- Component Instantiation
-          uut: <component name> PORT MAP(
-                  <port1> => <signal1>,
-                  <port3> => <signal2>
-          );
+      -- insert stimulus here 
 
+      wait;
+   end process;
 
-  --  Test Bench Statements
-     tb : PROCESS
-     BEGIN
-
-        wait for 100 ns; -- wait until global set/reset completes
-
-        -- Add user defined stimulus here
-
-        wait; -- will wait forever
-     END PROCESS tb;
-  --  End Test Bench 
-
-  END;
+END;
