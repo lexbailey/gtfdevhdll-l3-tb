@@ -59,6 +59,7 @@ BEGIN
 		nxt <= '0';
 		rst <= '1';
       wait for clk_period*2;
+		rst <= '0';
 		
 		next_loop: LOOP
 			nxt <= '1';

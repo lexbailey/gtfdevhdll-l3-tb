@@ -51,7 +51,7 @@ begin
 		end if;
 	end process state_reg;
 	
-	next_states: process(state,rst,nxt,done) is
+	next_states: process(state,nxt,done) is
 	begin
 		case state is
 			when STORE_0 =>
