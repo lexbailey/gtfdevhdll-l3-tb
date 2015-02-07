@@ -61,15 +61,24 @@ BEGIN
       wait for clk_period*2;
 		rst <= '0';
 		
-		next_loop: LOOP
+		next_loop_0: for i in 0 to 4 LOOP
 			nxt <= '1';
 			wait for clk_period*3;
 			nxt <= '0';
 			wait for clk_period*3;
-		END LOOP next_loop;
+		END LOOP next_loop_0;
 
-      -- insert stimulus here 
-
+      rst <= '1';
+      wait for clk_period*2;
+		rst <= '0';
+		
+		next_loop_1: LOOP
+			nxt <= '1';
+			wait for clk_period*3;
+			nxt <= '0';
+			wait for clk_period*3;
+		END LOOP next_loop_1;
+		
       wait;
    end process;
 
