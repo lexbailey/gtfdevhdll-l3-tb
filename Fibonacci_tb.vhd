@@ -56,11 +56,19 @@ BEGIN
       -- hold reset state for 100 ns.
       wait for 100 ns;	
 
+		--Initial reset
 		nxt <= '0';
 		rst <= '1';
       wait for clk_period*2;
 		rst <= '0';
+		wait for clk_period*3;
 		
+		--Self check
+		assert Fib_Out = "0000000000000000"
+		report "Initial reset failed"
+		severity error;
+		
+		--Take a few steps just to test reset after inital reset
 		next_loop_0: for i in 0 to 4 LOOP
 			nxt <= '1';
 			wait for clk_period*3;
@@ -68,10 +76,25 @@ BEGIN
 			wait for clk_period*3;
 		END LOOP next_loop_0;
 
+		--At this point, the output should have a non zero value on it, self check
+		assert Fib_Out /= "0000000000000000"
+		report "Step test failed"
+		severity error;
+
+		--Test reset after inital reset
       rst <= '1';
       wait for clk_period*2;
 		rst <= '0';
 		
+		--A reset should have worked after only 3 cycles
+		wait for clk_period*3;
+		
+		--Self test
+		assert Fib_Out = "0000000000000000"
+		report "Second reset failed"
+		severity error;
+		
+		--Keep stepping forever
 		next_loop_1: LOOP
 			nxt <= '1';
 			wait for clk_period*3;
